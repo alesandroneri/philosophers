@@ -1,24 +1,49 @@
 #ifndef PHILO_H
-#define PHILO_H
+# define PHILO_H
 
-#include <pthread.h>
+# include <pthread.h>
 
-//pthread_create()// create a new thread: on success returns 0, on error returns an error number.
-//pthread_detach()// detach a thread: on success returns 0, on error returns an error number.
-//pthread_join()// join with a terminated thread: on success returns 0, on error returns an error number.
-//pthread_mutex_init()// destroy and initialize a mutex: on success returns 0, on error returns an error number.
-//pthread_mutex_destroy() // destroy and initialize a mutex: on success returns 0, on error returns an error number.
-//pthread_mutex_lock()// lock and unlock a mutex: on success returns 0, on error returns an error number.
-//pthread_mutex_unlock()// unlock and lock a mutex: on success returns 0, on error returns an error number.
-//gettimeofday()// get / set time: return 0 for success, or -1 for failure.
+// pthread_create()// create a new thread: on success returns 0, on error returns an error number.
+// pthread_detach()// detach a thread: on success returns 0, on error returns an error number.
+// pthread_join()// join with a terminated thread: on success returns 0, on error returns an error number.
+// pthread_mutex_init()// destroy and initialize a mutex: on success returns 0, on error returns an error number.
+// pthread_mutex_destroy()
+// destroy and initialize a mutex: on success returns 0, on error returns an error number.
+// pthread_mutex_lock()// lock and unlock a mutex: on success returns 0,on error returns an error number.
+// pthread_mutex_unlock()// unlock and lock a mutex: on success returns 0,on error returns an error number.
+// gettimeofday()// get / set time: return 0 for success, or -1 for failure.
 
-typedef struct s_table{
-    int forks;
-} t_table;
+typedef struct s_table	t_table;
 
-typedef struct s_philo{
-    pthread_t th; // thread
-    struct s_philo  *next;
-} t_philo;
+typedef struct s_philo
+{
+	int					id;
+	pthread_t thread; // thread
+	pthread_mutex_t		right_fork;
+	pthread_mutex_t		left_fork;
+	int					meals_count;
+	int					last_meal;
+	int					nbr_meals_philo_must_eat;
+	int					philos_is_full;
+	t_table				*table;
+}						t_philo;
+
+struct	s_table
+{
+	int					philosophers_number;
+	int					time_to_die;
+	int					time_to_eat;
+	int					time_to_sleep;
+	int					time_to_think;
+	int					nbr_max_meals;
+	int					start_routine;
+	int					end_routine;
+	pthread_mutex_t		*forks;
+	t_philo				*philosophers;;
+};
+
+
+//parser para verificar que se os inputs estao corretos.
+void	parse(int ac, char **av, t_table *table);
 
 #endif
