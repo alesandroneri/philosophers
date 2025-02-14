@@ -1,7 +1,4 @@
-#ifndef PHILO_H
-# define PHILO_H
 
-# include <pthread.h>
 
 // pthread_create()// create a new thread: on success returns 0, on error returns an error number.
 // pthread_detach()// detach a thread: on success returns 0, on error returns an error number.
@@ -12,19 +9,27 @@
 // pthread_mutex_lock()// lock and unlock a mutex: on success returns 0,on error returns an error number.
 // pthread_mutex_unlock()// unlock and lock a mutex: on success returns 0,on error returns an error number.
 // gettimeofday()// get / set time: return 0 for success, or -1 for failure.
+#ifndef PHILO_H
+# define PHILO_H
+
+# include <pthread.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <sys/time.h>
 
 typedef struct s_table	t_table;
 
 typedef struct s_philo
 {
 	int					id;
-	pthread_t thread; // thread
+	pthread_t thread;
 	pthread_mutex_t		right_fork;
 	pthread_mutex_t		left_fork;
 	int					meals_count;
 	int					last_meal;
 	int					nbr_meals_philo_must_eat;
-	int					philos_is_full;
+	int					is_full;
+	int					is_alive;
 	t_table				*table;
 }						t_philo;
 
@@ -45,5 +50,9 @@ struct	s_table
 
 //parser para verificar que se os inputs estao corretos.
 void	parse(int ac, char **av, t_table *table);
+//init para inicializar a table, os filosofos e os garfos.
+void init_table(t_table *table);
+//funcao para calcular o tempo
+long long current_time_in_ms(void);
 
 #endif

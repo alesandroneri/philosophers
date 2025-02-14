@@ -6,7 +6,7 @@
 /*   By: aneri-da <aneri-da@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/13 19:12:21 by aneri-da          #+#    #+#             */
-/*   Updated: 2025/02/13 19:31:54 by aneri-da         ###   ########.fr       */
+/*   Updated: 2025/02/14 19:55:50 by aneri-da         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,5 +128,5 @@ void	parse(int ac, char **av, t_table *table)
 	if (av[5])
 		table->nbr_max_meals = ft_atoi(av[5]);
 	else
-		table->nbr_max_meals = 0;
+		table->nbr_max_meals = -1;
 }

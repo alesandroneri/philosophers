@@ -2,13 +2,6 @@
 #include <pthread.h>
 #include "philo.h"
 
-void init(t_table *table)
-{
-	table->end_routine = 0;
-	table->philosophers = malloc(sizeof(t_philo) * table->philosophers_number);
-	table->	
-}
-
 void new_philosopher(int philosopher)
 {
 
@@ -23,6 +16,8 @@ int main(int ac, char **av)
     if (ac == 5 || ac == 6)
     {
         parse(ac, av, &table);
+        init_table(&table);
+        dinner(&table);
 		
     }
     else
