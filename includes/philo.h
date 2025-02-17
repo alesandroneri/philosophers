@@ -13,6 +13,7 @@
 # define PHILO_H
 
 # include <pthread.h>
+# include <unistd.h>
 # include <stdio.h>
 # include <stdlib.h>
 # include <sys/time.h>
@@ -53,6 +54,17 @@ void	parse(int ac, char **av, t_table *table);
 //init para inicializar a table, os filosofos e os garfos.
 void init_table(t_table *table);
 //funcao para calcular o tempo
-long long current_time_in_ms(void);
+long long current_time_ms(void);
+//funcao para liberar a memoria alocada
+void free_resources(t_table *table);
+//funcao para pegar o garfo
+void get_fork(t_philo *philo, pthread_mutex_t fork);
+//funcao para deixar o garfo na mesa
+void put_fork(t_philo *philo, pthread_mutex_t fork);
+//funcao para o jantar
+//void dinner(t_table *table);
+void dinner(void *arg);
+//funcao para um filosofo
+void one_philo(t_table *table);
 
 #endif

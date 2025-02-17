@@ -1,16 +1,6 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   parse.c                                            :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: aneri-da <aneri-da@student.42.rio>         +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/02/13 19:12:21 by aneri-da          #+#    #+#             */
-/*   Updated: 2025/02/14 19:55:50 by aneri-da         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
-#include "philo.h"
+
+#include "../includes/philo.h"
 
 static long	ft_atol(const char *nptr)
 {
@@ -98,13 +88,12 @@ static int	is_all_numbers(char *nb)
 static int	parse_arguments(int ac, char **av)
 {
 	int		i;
-	int		j;
 	long	nb;
 
 	i = 0;
-	while (i < ac)
+	while (++i < ac)
 	{
-		if (!ft_is_all_numbers(av[i]))
+		if (!is_all_numbers(av[i]))
 			return (0);
 		nb = ft_atol(av[i]);
 		if (nb > (long)2147483647 || nb < (long)-2147483648)
@@ -112,7 +101,6 @@ static int	parse_arguments(int ac, char **av)
 			printf("Error INT_MAX is the largest number accepted.\n");
 			return (0);
 		}
-		i++;
 	}
 	return (1);
 }

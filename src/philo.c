@@ -1,24 +1,15 @@
-#include <stdio.h>
-#include <pthread.h>
-#include "philo.h"
-
-void new_philosopher(int philosopher)
-{
-
-}
+#include "../includes/philo.h"
 
 int main(int ac, char **av)
 {
     t_table table;
 
-    //pthread_create(&philosophers, NULL, &routine, NULL);
-    //pthread_join(philosophers, NULL);
     if (ac == 5 || ac == 6)
     {
         parse(ac, av, &table);
         init_table(&table);
         dinner(&table);
-		
+		free_resources(&table);
     }
     else
     {
