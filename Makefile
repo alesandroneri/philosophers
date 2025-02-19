@@ -42,6 +42,15 @@ fclean: clean
 
 re: fclean all
 
+deadlock:
+	@valgrind --tool=drd ./${NAME} ${args}
+
+hellgrind:
+	@valgrind --tool=helgrind ./${NAME} ${args}
+
+v:
+	@valgrind -s --track-origins=yes  --leak-check=full --show-leak-kinds=all ./${NAME} ${args}
+
 c:
 	@find . -type f -iname "*.c" -exec grep "//" {} +
 

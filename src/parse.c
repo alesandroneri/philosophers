@@ -68,7 +68,6 @@ static int	is_all_numbers(char *nb)
 	len = -1;
 	while (nb[++len] != '\0')
 		;
-	;
 	if (len == 1 && (nb[0] == '-' || nb[0] == '+'))
 		return (0);
 	i = 0;
@@ -81,7 +80,10 @@ static int	is_all_numbers(char *nb)
 		i++;
 	while (nb[i] != '\0')
 		if (!(nb[i] >= '0' && nb[i++] <= '9'))
+		{
+			printf("Error only numbers must be passed as arguments.\n");
 			return (0);
+		}
 	return (1);
 }
 
@@ -105,16 +107,17 @@ static int	parse_arguments(int ac, char **av)
 	return (1);
 }
 
-void	parse(int ac, char **av, t_table *table)
+int	parse(int ac, char **av, t_table *table)
 {
 	if (parse_arguments(ac, av) == 0)
-		return ;
+		return (0);
 	table->philosophers_number = ft_atoi(av[1]);
-	table->time_to_die = ft_atoi(av[2]);
-	table->time_to_eat = ft_atoi(av[3]);
-	table->time_to_sleep = ft_atoi(av[4]);
+	table->time_to_die = ft_atol(av[2]);
+	table->time_to_eat = ft_atol(av[3]);
+	table->time_to_sleep = ft_atol(av[4]);
 	if (av[5])
 		table->nbr_max_meals = ft_atoi(av[5]);
 	else
 		table->nbr_max_meals = -1;
+	return (1);
 }

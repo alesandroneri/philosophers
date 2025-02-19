@@ -1,37 +1,62 @@
 #include "../includes/philo.h"
 
-void get_fork(t_philo *philo, pthread_mutex_t fork)
+void	get_fork(t_philo *philo, pthread_mutex_t *fork)
 {
-    pthread_mutex_lock(&fork);
-    printf("%lld %d has taken a fork\n", current_time_ms(),philo->id);
+	pthread_mutex_lock(fork);
+	printf("%zu %d has taken a fork\n", current_time_ms(), philo->id);
 }
 
-void put_fork(t_philo *philo, pthread_mutex_t fork)
+void	put_fork(t_philo *philo, pthread_mutex_t *fork)
 {
-    (void)philo;
-    pthread_mutex_unlock(&fork);
-    //printf("%lld %d has put a fork\n", current_time_ms(),philo->id);
+	(void)philo;
+	pthread_mutex_unlock(fork);
 }
 
-long long current_time_ms(void)
-{
-    struct timeval tv;
+// void	get_time(size_t milisecond)
+// {
+// 	usleep(milisecond * 1000);
+// }
 
-    gettimeofday(&tv, NULL);
-    return (tv.tv_sec * 1000LL) + (tv.tv_usec / 1000LL);
-}
-void one_philo(t_table *table)
+void	get_time(size_t milisecond)
 {
-    printf("%lld %d died\n", current_time_ms(), table->philosophers->id);
+	size_t	start;
+
+	start = current_time_ms();
+	while (current_time_ms() - start < milisecond)
+		usleep(200);
 }
-void free_resources(t_table *table)
+
+size_t	current_time_ms(void)
 {
-    int i;
-    if(table->philosophers)
-        free(table->philosophers);
-    i = -1;
-    while(++i < table->philosophers_number)
-        pthread_mutex_destroy(&table->forks[i]);
-    free(table->forks);
-    free(table);
+	struct timeval	time;
+
+	if (gettimeofday(&time, NULL) == -1)
+	{
+		printf("Error gettimeofday failed.\n");
+		return (1);
+	}
+	return ((time.tv_sec * 1000) + (time.tv_usec / 1000));
+}
+
+void	one_philo(t_table *table)
+{
+	printf("%zu %d died\n", current_time_ms(), table->philosophers->id);
+}
+
+void	free_resources(t_table *table)
+{
+	int i;
+
+    if (!table)
+        return ;
+    if (table->forks)
+    {
+        i = -1;
+        while (++i < table->philosophers_number)
+		    pthread_mutex_destroy(&table->forks[i]);
+        free(table->forks);
+    }
+	if (table->philosophers)
+		free(table->philosophers);
+	//free(table);
 }
