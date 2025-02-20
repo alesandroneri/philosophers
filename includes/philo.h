@@ -35,6 +35,7 @@ struct	s_table
 	int					start_routine;
 	int					end_routine;
 	pthread_mutex_t		*forks;
+	pthread_mutex_t		state_mutex;
 	t_philo				*philosophers;;
 };
 

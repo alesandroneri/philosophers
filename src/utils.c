@@ -12,11 +12,6 @@ void	put_fork(t_philo *philo, pthread_mutex_t *fork)
 	pthread_mutex_unlock(fork);
 }
 
-// void	get_time(size_t milisecond)
-// {
-// 	usleep(milisecond * 1000);
-// }
-
 void	get_time(size_t milisecond)
 {
 	size_t	start;
@@ -56,6 +51,7 @@ void	free_resources(t_table *table)
 		    pthread_mutex_destroy(&table->forks[i]);
         free(table->forks);
     }
+	pthread_mutex_destroy(&table->state_mutex);
 	if (table->philosophers)
 		free(table->philosophers);
 	//free(table);

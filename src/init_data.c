@@ -39,6 +39,8 @@ void	init_table(t_table *table)
 	int	i;
 
 	table->end_routine = 0;
+	if (pthread_mutex_init(&table->state_mutex, NULL) != 0)
+		return ;
 	table->philosophers = (t_philo *)malloc(sizeof(t_philo)
 			* table->philosophers_number);
 	if (!table->philosophers)
