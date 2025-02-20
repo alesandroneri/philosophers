@@ -2,8 +2,15 @@
 
 static void	to_eat(t_philo *philo)
 {
+	pthread_mutex_lock(&philo->table->state_mutex);
 	if (philo->table->end_routine)
+	{
+		pthread_mutex_unlock(&philo->table->state_mutex);
 		return ;
+	}
+	pthread_mutex_unlock(&philo->table->state_mutex);
+	if (philo->id % 2 == 1)
+		usleep(2000);
 	if (philo->id % 2 == 0)
 	{
 		get_fork(philo, &philo->left_fork);
@@ -28,16 +35,28 @@ static void	to_eat(t_philo *philo)
 
 static void	to_sleep(t_philo *philo)
 {
+	pthread_mutex_lock(&philo->table->state_mutex);
 	if (philo->table->end_routine)
+	{
+		pthread_mutex_unlock(&philo->table->state_mutex);
 		return ;
+	}
+	pthread_mutex_unlock(&philo->table->state_mutex);
 	printf("%zu %d is sleeping\n", current_time_ms(), philo->id);
+	pthread_mutex_lock(&philo->table->state_mutex);
 	get_time(philo->table->time_to_sleep);
+	pthread_mutex_unlock(&philo->table->state_mutex);
 }
 
 static void	to_think(t_philo *philo)
 {
+	pthread_mutex_lock(&philo->table->state_mutex);
 	if (philo->table->end_routine)
+	{
+		pthread_mutex_unlock(&philo->table->state_mutex);
 		return ;
+	}
+	pthread_mutex_unlock(&philo->table->state_mutex);
 	printf("%zu %d is thinking\n", current_time_ms(), philo->id);
 }
 
@@ -76,7 +95,7 @@ static void	*monitor(t_table *table)
 			pthread_mutex_unlock(&table->state_mutex);
 			return (NULL);
 		}
-		usleep(500);
+		usleep(1000);
 	}
 }
 
