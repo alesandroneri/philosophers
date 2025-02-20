@@ -2,6 +2,7 @@
 
 static void	to_eat(t_philo *philo)
 {
+	long now;
 	pthread_mutex_lock(&philo->table->state_mutex);
 	if (philo->table->end_routine)
 	{
@@ -9,8 +10,8 @@ static void	to_eat(t_philo *philo)
 		return ;
 	}
 	pthread_mutex_unlock(&philo->table->state_mutex);
-	if (philo->id % 2 == 1)
-		usleep(2000);
+	// if (philo->id % 2 == 1)
+	// 	usleep(2000);
 	if (philo->id % 2 == 0)
 	{
 		get_fork(philo, &philo->left_fork);
@@ -21,10 +22,13 @@ static void	to_eat(t_philo *philo)
 		get_fork(philo, &philo->right_fork);
 		get_fork(philo, &philo->left_fork);
 	}
+	now = current_time_ms();
 	printf("%zu %d is eating\n", current_time_ms(), philo->id);
 	pthread_mutex_lock(&philo->table->state_mutex);
-	philo->last_meal = current_time_ms();
+	philo->last_meal = now;
+	pthread_mutex_unlock(&philo->table->state_mutex);
 	get_time(philo->table->time_to_eat);
+	pthread_mutex_lock(&philo->table->state_mutex);
 	philo->meals_count++;
 	if (philo->meals_count == philo->table->nbr_max_meals)
 		philo->is_full = 1;
@@ -35,6 +39,7 @@ static void	to_eat(t_philo *philo)
 
 static void	to_sleep(t_philo *philo)
 {
+	int sleep_time;
 	pthread_mutex_lock(&philo->table->state_mutex);
 	if (philo->table->end_routine)
 	{
@@ -46,6 +51,14 @@ static void	to_sleep(t_philo *philo)
 	pthread_mutex_lock(&philo->table->state_mutex);
 	get_time(philo->table->time_to_sleep);
 	pthread_mutex_unlock(&philo->table->state_mutex);
+	sleep_time = philo->table->time_to_sleep;
+    while (sleep_time > 0)
+    {
+        if (philo->table->end_routine)
+            return;
+        usleep(500);
+        sleep_time -= 1;
+    }
 }
 
 static void	to_think(t_philo *philo)
@@ -65,6 +78,7 @@ static void	*monitor(t_table *table)
 	int		i;
 	long	time_elapsed;
 	int		finished_dinner;
+	long now;
 
 	while (1)
 	{
@@ -73,9 +87,11 @@ static void	*monitor(t_table *table)
 		while (++i < table->philosophers_number)
 		{
 			pthread_mutex_lock(&table->state_mutex);
-			time_elapsed = current_time_ms() - table->philosophers[i].last_meal;
+			now = current_time_ms();
+			time_elapsed = now - table->philosophers[i].last_meal;
 			if (time_elapsed >= table->time_to_die)
 			{
+				usleep(500);
 				printf("%zu %d died\n", current_time_ms(),
 					table->philosophers[i].id);
 				table->philosophers[i].is_alive = 0;

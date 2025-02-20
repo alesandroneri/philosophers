@@ -21,6 +21,7 @@ void	get_time(size_t milisecond)
 		usleep(200);
 }
 
+
 size_t	current_time_ms(void)
 {
 	struct timeval	time;
@@ -54,5 +55,4 @@ void	free_resources(t_table *table)
 	pthread_mutex_destroy(&table->state_mutex);
 	if (table->philosophers)
 		free(table->philosophers);
-	//free(table);
 }
