@@ -35,6 +35,7 @@ struct	s_table
 	int					start_routine;
 	int					end_routine;
 	pthread_mutex_t		*forks;
+	pthread_mutex_t forks_mutex;
 	pthread_mutex_t		state_mutex;
 	t_philo				*philosophers;;
 };
@@ -58,5 +59,10 @@ void put_fork(t_philo *philo, pthread_mutex_t *fork);
 void dinner(void *arg);
 //funcao para um filosofo
 void one_philo(t_table *table);
+
+void grab_forks(t_philo *philo, pthread_mutex_t *fork_one, pthread_mutex_t *fork_two);
+
+
+void leave_forks(t_philo *philo, pthread_mutex_t *fork_one, pthread_mutex_t *fork_two);
 
 #endif

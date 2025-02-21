@@ -1,5 +1,6 @@
 #include "../includes/philo.h"
 
+
 void	get_fork(t_philo *philo, pthread_mutex_t *fork)
 {
 	pthread_mutex_lock(fork);
@@ -10,6 +11,18 @@ void	put_fork(t_philo *philo, pthread_mutex_t *fork)
 {
 	(void)philo;
 	pthread_mutex_unlock(fork);
+}
+void grab_forks(t_philo *philo, pthread_mutex_t *fork_one, pthread_mutex_t *fork_two)
+{
+	pthread_mutex_lock(&philo->table->forks_mutex); // Trava o mutex dos garfos
+    get_fork(philo, fork_one);
+    get_fork(philo, fork_two);
+    pthread_mutex_unlock(&philo->table->forks_mutex);
+}
+void leave_forks(t_philo *philo, pthread_mutex_t *fork_one, pthread_mutex_t *fork_two)
+{
+	put_fork(philo, fork_one);
+	put_fork(philo, fork_two);
 }
 
 void	get_time(size_t milisecond)

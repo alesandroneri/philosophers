@@ -8,7 +8,7 @@ SRC = src/init_data.c \
 
 CC = cc
 
-CC_FLAGS = -g -Wall -Wextra -Werror 
+CC_FLAGS = -g -Wall -Wextra -Werror
 
 OBJ = $(SRC:.c=.o)
 

@@ -2,7 +2,8 @@
 
 static void	to_eat(t_philo *philo)
 {
-	long now;
+	//printf("Filosofo: %d esta comendo.\n", philo->id);
+	//long now;
 	pthread_mutex_lock(&philo->table->state_mutex);
 	if (philo->table->end_routine)
 	{
@@ -10,36 +11,28 @@ static void	to_eat(t_philo *philo)
 		return ;
 	}
 	pthread_mutex_unlock(&philo->table->state_mutex);
-	// if (philo->id % 2 == 1)
-	// 	usleep(2000);
 	if (philo->id % 2 == 0)
-	{
-		get_fork(philo, &philo->left_fork);
-		get_fork(philo, &philo->right_fork);
-	}
+		grab_forks(philo, &philo->right_fork, &philo->left_fork);
 	else
-	{
-		get_fork(philo, &philo->right_fork);
-		get_fork(philo, &philo->left_fork);
-	}
-	now = current_time_ms();
+		grab_forks(philo, &philo->left_fork, &philo->right_fork);
+	//now = current_time_ms();
 	printf("%zu %d is eating\n", current_time_ms(), philo->id);
 	pthread_mutex_lock(&philo->table->state_mutex);
-	philo->last_meal = now;
+	philo->last_meal = current_time_ms();
 	pthread_mutex_unlock(&philo->table->state_mutex);
-	get_time(philo->table->time_to_eat);
+	usleep(philo->table->time_to_eat * 1000);
 	pthread_mutex_lock(&philo->table->state_mutex);
 	philo->meals_count++;
 	if (philo->meals_count == philo->table->nbr_max_meals)
 		philo->is_full = 1;
 	pthread_mutex_unlock(&philo->table->state_mutex);
-	put_fork(philo, &philo->right_fork);
-	put_fork(philo, &philo->left_fork);
+	leave_forks(philo, &philo->right_fork, &philo->left_fork);
+	//printf("Filosofo: %d terminou de comer.\n", philo->id);
 }
 
 static void	to_sleep(t_philo *philo)
 {
-	int sleep_time;
+	//printf("Filosofo: %d esta dormindo.\n", philo->id);
 	pthread_mutex_lock(&philo->table->state_mutex);
 	if (philo->table->end_routine)
 	{
@@ -49,20 +42,14 @@ static void	to_sleep(t_philo *philo)
 	pthread_mutex_unlock(&philo->table->state_mutex);
 	printf("%zu %d is sleeping\n", current_time_ms(), philo->id);
 	pthread_mutex_lock(&philo->table->state_mutex);
-	get_time(philo->table->time_to_sleep);
+	usleep(philo->table->time_to_sleep * 1000);
 	pthread_mutex_unlock(&philo->table->state_mutex);
-	sleep_time = philo->table->time_to_sleep;
-    while (sleep_time > 0)
-    {
-        if (philo->table->end_routine)
-            return;
-        usleep(500);
-        sleep_time -= 1;
-    }
+	//printf("Filosofo: %d terminou de dormir.\n", philo->id);
 }
 
 static void	to_think(t_philo *philo)
 {
+	//printf("Filosofo: %d esta pensando.\n", philo->id);
 	pthread_mutex_lock(&philo->table->state_mutex);
 	if (philo->table->end_routine)
 	{
@@ -71,6 +58,7 @@ static void	to_think(t_philo *philo)
 	}
 	pthread_mutex_unlock(&philo->table->state_mutex);
 	printf("%zu %d is thinking\n", current_time_ms(), philo->id);
+	//printf("Filosofo: %d terminou de pensar.\n", philo->id);
 }
 
 static void	*monitor(t_table *table)
@@ -79,17 +67,19 @@ static void	*monitor(t_table *table)
 	long	time_elapsed;
 	int		finished_dinner;
 	long now;
-
+	//printf("Monitor()...\n");
 	while (1)
 	{
 		i = -1;
 		finished_dinner = 0;
+		//printf("Monitor checando filosofos no tempo %zu\n", current_time_ms());
 		while (++i < table->philosophers_number)
 		{
 			pthread_mutex_lock(&table->state_mutex);
 			now = current_time_ms();
 			time_elapsed = now - table->philosophers[i].last_meal;
-			if (time_elapsed >= table->time_to_die)
+			//printf("Filosofo %d: now = %zu, last_meal = %zu, time_elapsed = %zu, time_to_die = %zu\n", table->philosophers[i].id, now, table->philosophers[i].last_meal, time_elapsed, table->time_to_die);
+			if (time_elapsed > table->time_to_die)
 			{
 				usleep(500);
 				printf("%zu %d died\n", current_time_ms(),
@@ -111,7 +101,6 @@ static void	*monitor(t_table *table)
 			pthread_mutex_unlock(&table->state_mutex);
 			return (NULL);
 		}
-		usleep(1000);
 	}
 }
 
