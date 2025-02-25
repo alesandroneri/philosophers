@@ -15,7 +15,7 @@ OBJ = $(SRC:.c=.o)
 all: $(NAME)
 
 $(NAME): $(OBJ)
-	@$(CC) $(CC_FLAGS) $(OBJ) -o $(NAME)
+	@$(CC) $(CC_FLAGS) -pthread  $(OBJ) -o $(NAME)
 	@echo -n "Loading"
 	@for i in {1..5}; do \
 		echo -n "."; \

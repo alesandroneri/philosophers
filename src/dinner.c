@@ -2,105 +2,94 @@
 
 static void	to_eat(t_philo *philo)
 {
-	//printf("Filosofo: %d esta comendo.\n", philo->id);
-	//long now;
 	pthread_mutex_lock(&philo->table->state_mutex);
-	if (philo->table->end_routine)
+	if (philo->table->end)
 	{
 		pthread_mutex_unlock(&philo->table->state_mutex);
 		return ;
 	}
 	pthread_mutex_unlock(&philo->table->state_mutex);
 	if (philo->id % 2 == 0)
-		grab_forks(philo, &philo->right_fork, &philo->left_fork);
+		grab_forks(philo, philo->right_fork, philo->left_fork);
 	else
-		grab_forks(philo, &philo->left_fork, &philo->right_fork);
-	//now = current_time_ms();
-	printf("%zu %d is eating\n", current_time_ms(), philo->id);
+		grab_forks(philo, philo->left_fork, philo->right_fork);
+	printf("%ld %d is eating\n", timez(philo), philo->id);
 	pthread_mutex_lock(&philo->table->state_mutex);
-	philo->last_meal = current_time_ms();
+	philo->last_meal = timez(philo);
 	pthread_mutex_unlock(&philo->table->state_mutex);
 	usleep(philo->table->time_to_eat * 1000);
 	pthread_mutex_lock(&philo->table->state_mutex);
-	philo->meals_count++;
-	if (philo->meals_count == philo->table->nbr_max_meals)
+	philo->count++;
+	if (philo->count == philo->table->max_meals)
 		philo->is_full = 1;
 	pthread_mutex_unlock(&philo->table->state_mutex);
-	leave_forks(philo, &philo->right_fork, &philo->left_fork);
-	//printf("Filosofo: %d terminou de comer.\n", philo->id);
+	leave_forks(philo, philo->right_fork, philo->left_fork);
 }
 
 static void	to_sleep(t_philo *philo)
 {
-	//printf("Filosofo: %d esta dormindo.\n", philo->id);
 	pthread_mutex_lock(&philo->table->state_mutex);
-	if (philo->table->end_routine)
+	if (philo->table->end)
 	{
 		pthread_mutex_unlock(&philo->table->state_mutex);
 		return ;
 	}
 	pthread_mutex_unlock(&philo->table->state_mutex);
-	printf("%zu %d is sleeping\n", current_time_ms(), philo->id);
+	printf("%ld %d is sleeping\n", timez(philo), philo->id);
 	pthread_mutex_lock(&philo->table->state_mutex);
 	usleep(philo->table->time_to_sleep * 1000);
 	pthread_mutex_unlock(&philo->table->state_mutex);
-	//printf("Filosofo: %d terminou de dormir.\n", philo->id);
 }
 
 static void	to_think(t_philo *philo)
 {
-	//printf("Filosofo: %d esta pensando.\n", philo->id);
 	pthread_mutex_lock(&philo->table->state_mutex);
-	if (philo->table->end_routine)
+	if (philo->table->end)
 	{
 		pthread_mutex_unlock(&philo->table->state_mutex);
 		return ;
 	}
 	pthread_mutex_unlock(&philo->table->state_mutex);
-	printf("%zu %d is thinking\n", current_time_ms(), philo->id);
-	//printf("Filosofo: %d terminou de pensar.\n", philo->id);
+	printf("%zu %d is thinking\n", timez(philo), philo->id);
 }
+
 
 static void	*monitor(t_table *table)
 {
 	int		i;
 	long	time_elapsed;
 	int		finished_dinner;
-	long now;
-	//printf("Monitor()...\n");
+
 	while (1)
 	{
 		i = -1;
 		finished_dinner = 0;
-		//printf("Monitor checando filosofos no tempo %zu\n", current_time_ms());
-		while (++i < table->philosophers_number)
+		while (++i < table->philo_nbr)
 		{
 			pthread_mutex_lock(&table->state_mutex);
-			now = current_time_ms();
-			time_elapsed = now - table->philosophers[i].last_meal;
-			//printf("Filosofo %d: now = %zu, last_meal = %zu, time_elapsed = %zu, time_to_die = %zu\n", table->philosophers[i].id, now, table->philosophers[i].last_meal, time_elapsed, table->time_to_die);
+			time_elapsed = current_time_ms() - table->philos[i].last_meal;
+			pthread_mutex_unlock(&table->state_mutex);
 			if (time_elapsed > table->time_to_die)
 			{
 				usleep(500);
-				printf("%zu %d died\n", current_time_ms(),
-					table->philosophers[i].id);
-				table->philosophers[i].is_alive = 0;
-				table->end_routine = 1;
-				pthread_mutex_unlock(&table->state_mutex);
+				printf("%ld %d died\n", timez(&table->philos[i]),
+					table->philos[i].id);
+				table->philos[i].is_alive = 0;
+				table->end = 1;
 				return (NULL);
 			}
-			if (table->nbr_max_meals > 0
-				&& table->philosophers[i].meals_count == table->nbr_max_meals)
+			if (table->max_meals > 0
+				&& table->philos[i].count == table->max_meals)
 				finished_dinner++;
-			pthread_mutex_unlock(&table->state_mutex);
 		}
-		if (finished_dinner == table->philosophers_number)
+		if (finished_dinner == table->philo_nbr)
 		{
 			pthread_mutex_lock(&table->state_mutex);
-			table->end_routine = 1;
+			table->end = 1;
 			pthread_mutex_unlock(&table->state_mutex);
 			return (NULL);
 		}
+		usleep(1000);
 	}
 }
 
@@ -112,14 +101,14 @@ static void	*philosopher_routine(void *arg)
 	while (1)
 	{
 		pthread_mutex_lock(&philo->table->state_mutex);
-		if (philo->table->end_routine || !philo->is_alive)
+		if (philo->table->end || !philo->is_alive)
 		{
 			pthread_mutex_unlock(&philo->table->state_mutex);
 			return (NULL);
 		}
 		pthread_mutex_unlock(&philo->table->state_mutex);
-		if (philo->table->nbr_max_meals == -1
-			|| philo->meals_count < philo->table->nbr_max_meals)
+		if (philo->table->max_meals == -1
+			|| philo->count < philo->table->max_meals)
 		{
 			to_eat(philo);
 			to_sleep(philo);
@@ -134,19 +123,19 @@ static void	handle_thread(t_table *table, pthread_t monitor_th)
 	int	i;
 
 	i = -1;
-	while (++i < table->philosophers_number)
-		if (pthread_create(&table->philosophers[i].thread, NULL,
-				philosopher_routine, &table->philosophers[i]) != 0)
+	while (++i < table->philo_nbr)
+		if (pthread_create(&table->philos[i].thread, NULL, philosopher_routine,
+				&table->philos[i]) != 0)
 		{
 			printf("Failed to create thread for philosopher %d.\n", i);
 			pthread_mutex_lock(&table->state_mutex);
-			table->end_routine = 1;
+			table->end = 1;
 			pthread_mutex_unlock(&table->state_mutex);
 			return ;
 		}
 	i = -1;
-	while (++i < table->philosophers_number)
-		pthread_join(table->philosophers[i].thread, NULL);
+	while (++i < table->philo_nbr)
+		pthread_join(table->philos[i].thread, NULL);
 	pthread_join(monitor_th, NULL);
 }
 
@@ -156,7 +145,7 @@ void	dinner(void *arg)
 	t_table		*table;
 
 	table = (t_table *)arg;
-	if (table->philosophers_number == 0)
+	if (table->philo_nbr == 0)
 	{
 		printf("Error the number of philosophers must be at least one.\n");
 		return ;
@@ -166,12 +155,12 @@ void	dinner(void *arg)
 		printf("Thread to monitor death of philosophers failed to be created.\n");
 		return ;
 	}
-	if (table->philosophers_number == 1)
+	if (table->philo_nbr == 1)
 	{
 		one_philo(table);
 		return ;
 	}
-	if (table->nbr_max_meals == 0)
+	if (table->max_meals == 0)
 	{
 		printf("Error the numbers of meals must be at least one.\n");
 		return ;

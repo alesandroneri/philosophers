@@ -2,16 +2,18 @@
 
 static void	init_forks(t_philo *philo, pthread_mutex_t *forks, int pos)
 {
+	int nbr;
+
+	nbr = philo->table->philo_nbr;
 	if (philo->id % 2 != 0)
 	{
-    philo->right_fork = forks[(pos + 1)
-        % philo->table->philosophers_number];
-    philo->left_fork = forks[pos];
+		philo->right_fork = &forks[(pos + 1) % nbr];
+		philo->left_fork = &forks[pos];
 	}
 	if (philo->id % 2 == 0)
 	{
-		philo->right_fork = forks[pos];
-		philo->left_fork = forks[(pos + 1) % philo->table->philosophers_number];
+		philo->right_fork = &forks[pos];
+		philo->left_fork = &forks[(pos + 1) % nbr];
 	}
 }
 
@@ -21,14 +23,14 @@ static void	init_philosophers(t_table *table)
 	int		i;
 
 	i = -1;
-	while (++i < table->philosophers_number)
+	while (++i < table->philo_nbr)
 	{
-		philo = table->philosophers + i;
+		philo = table->philos + i;
 		philo->id = i + 1;
 		philo->last_meal = current_time_ms();
 		philo->is_full = 0;
 		philo->is_alive = 1;
-		philo->meals_count = 0;
+		philo->count = 0;
 		philo->table = table;
 		init_forks(philo, table->forks, i);
 	}
@@ -38,24 +40,28 @@ void	init_table(t_table *table)
 {
 	int	i;
 
-	table->end_routine = 0;
+	table->end = 0;
+	table->start = current_time_ms();
 	if (pthread_mutex_init(&table->state_mutex, NULL) != 0)
 		return ;
 	if (pthread_mutex_init(&table->forks_mutex, NULL) != 0)
 		return ;
-	table->philosophers = (t_philo *)malloc(sizeof(t_philo)
-			* table->philosophers_number);
-	if (!table->philosophers)
+	table->philos = (t_philo *)malloc(sizeof(t_philo) * table->philo_nbr);
+	if (!table->philos)
 		return ;
 	table->forks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t)
-			* table->philosophers_number);
+			* table->philo_nbr);
 	if (!table->forks)
 	{
-		free(table->philosophers);
+		free(table->philos);
 		return ;
 	}
+	table->forks_state = (int *)malloc(sizeof(int) * table->philo_nbr);
 	i = -1;
-	while (++i < table->philosophers_number)
+	while (++i < table->philo_nbr)
+	{
 		pthread_mutex_init(&table->forks[i], NULL);
+		table->forks_state[i] = 0;
+	}
 	init_philosophers(table);
 }

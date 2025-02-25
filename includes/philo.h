@@ -14,11 +14,10 @@ typedef struct s_philo
 {
 	int					id;
 	pthread_t thread;
-	pthread_mutex_t		right_fork;
-	pthread_mutex_t		left_fork;
-	int					meals_count;
-	long					last_meal;
-	int					nbr_meals_philo_must_eat;
+	pthread_mutex_t		*right_fork;
+	pthread_mutex_t		*left_fork;
+	int					count;
+	size_t					last_meal;
 	int					is_full;
 	int					is_alive;
 	t_table				*table;
@@ -26,21 +25,22 @@ typedef struct s_philo
 
 struct	s_table
 {
-	int					philosophers_number;
+	int					philo_nbr;
 	long					time_to_die;
 	long					time_to_eat;
 	long					time_to_sleep;
 	long					time_to_think;
-	int					nbr_max_meals;
-	int					start_routine;
-	int					end_routine;
+	int					max_meals;
+	long					start;
+	int					end;
 	pthread_mutex_t		*forks;
+	int *forks_state;
 	pthread_mutex_t forks_mutex;
 	pthread_mutex_t		state_mutex;
-	t_philo				*philosophers;;
+	t_philo				*philos;;
 };
 
-
+long	timez(t_philo *ph);
 //parser para verificar que se os inputs estao corretos.
 int	parse(int ac, char **av, t_table *table);
 //init para inicializar a table, os filosofos e os garfos.

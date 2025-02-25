@@ -111,13 +111,13 @@ int	parse(int ac, char **av, t_table *table)
 {
 	if (parse_arguments(ac, av) == 0)
 		return (0);
-	table->philosophers_number = ft_atoi(av[1]);
+	table->philo_nbr = ft_atoi(av[1]);
 	table->time_to_die = ft_atol(av[2]);
 	table->time_to_eat = ft_atol(av[3]);
 	table->time_to_sleep = ft_atol(av[4]);
 	if (av[5])
-		table->nbr_max_meals = ft_atoi(av[5]);
+		table->max_meals = ft_atoi(av[5]);
 	else
-		table->nbr_max_meals = -1;
+		table->max_meals = -1;
 	return (1);
 }
