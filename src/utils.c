@@ -32,7 +32,14 @@ void	get_time(size_t milisecond)
 	while (current_time_ms() - start < milisecond)
 		usleep(200);
 }
-
+void my_sleep(size_t sleeping)
+{
+	size_t start;
+	
+	start = current_time_ms();
+	while (current_time_ms() < start + sleeping)
+		;
+}
 
 long	timez(t_philo *philo)
 {

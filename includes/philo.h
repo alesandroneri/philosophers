@@ -40,7 +40,7 @@ struct	s_table
 	t_philo				*philos;;
 };
 
-long	timez(t_philo *ph);
+long	timez(t_philo *philo);
 //parser para verificar que se os inputs estao corretos.
 int	parse(int ac, char **av, t_table *table);
 //init para inicializar a table, os filosofos e os garfos.
@@ -60,9 +60,12 @@ void dinner(void *arg);
 //funcao para um filosofo
 void one_philo(t_table *table);
 
+//void monitor(t_table *table);
+
 void grab_forks(t_philo *philo, pthread_mutex_t *fork_one, pthread_mutex_t *fork_two);
 
-
 void leave_forks(t_philo *philo, pthread_mutex_t *fork_one, pthread_mutex_t *fork_two);
+
+void my_sleep(size_t sleeping);
 
 #endif

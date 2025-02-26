@@ -5,11 +5,8 @@ static void	init_forks(t_philo *philo, pthread_mutex_t *forks, int pos)
 	int nbr;
 
 	nbr = philo->table->philo_nbr;
-	if (philo->id % 2 != 0)
-	{
-		philo->right_fork = &forks[(pos + 1) % nbr];
-		philo->left_fork = &forks[pos];
-	}
+	philo->right_fork = &forks[(pos + 1) % nbr];
+	philo->left_fork = &forks[pos];
 	if (philo->id % 2 == 0)
 	{
 		philo->right_fork = &forks[pos];

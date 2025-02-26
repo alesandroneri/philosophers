@@ -2,57 +2,70 @@
 
 static void	to_eat(t_philo *philo)
 {
+	//if (philo->id % 2 == 0)
+	//{
 	pthread_mutex_lock(&philo->table->state_mutex);
-	if (philo->table->end)
-	{
-		pthread_mutex_unlock(&philo->table->state_mutex);
-		return ;
-	}
+	grab_forks(philo, philo->right_fork, philo->left_fork);
 	pthread_mutex_unlock(&philo->table->state_mutex);
-	if (philo->id % 2 == 0)
-		grab_forks(philo, philo->right_fork, philo->left_fork);
-	else
-		grab_forks(philo, philo->left_fork, philo->right_fork);
-	printf("%ld %d is eating\n", timez(philo), philo->id);
+	//}
+	// else
+	// {
+	// 	pthread_mutex_lock(&philo->table->state_mutex);
+	// 	grab_forks(philo, philo->left_fork, philo->right_fork);
+	// 	pthread_mutex_unlock(&philo->table->state_mutex);
+	// }
 	pthread_mutex_lock(&philo->table->state_mutex);
 	philo->last_meal = timez(philo);
+	printf("%ld %d is eating\n", philo->last_meal, philo->id);
 	pthread_mutex_unlock(&philo->table->state_mutex);
-	usleep(philo->table->time_to_eat * 1000);
-	pthread_mutex_lock(&philo->table->state_mutex);
+	my_sleep(philo->table->time_to_eat);
 	philo->count++;
 	if (philo->count == philo->table->max_meals)
 		philo->is_full = 1;
-	pthread_mutex_unlock(&philo->table->state_mutex);
 	leave_forks(philo, philo->right_fork, philo->left_fork);
 }
 
 static void	to_sleep(t_philo *philo)
 {
-	pthread_mutex_lock(&philo->table->state_mutex);
-	if (philo->table->end)
-	{
-		pthread_mutex_unlock(&philo->table->state_mutex);
-		return ;
-	}
-	pthread_mutex_unlock(&philo->table->state_mutex);
 	printf("%ld %d is sleeping\n", timez(philo), philo->id);
-	pthread_mutex_lock(&philo->table->state_mutex);
-	usleep(philo->table->time_to_sleep * 1000);
-	pthread_mutex_unlock(&philo->table->state_mutex);
+	my_sleep(philo->table->time_to_sleep);
 }
 
 static void	to_think(t_philo *philo)
 {
-	pthread_mutex_lock(&philo->table->state_mutex);
-	if (philo->table->end)
-	{
-		pthread_mutex_unlock(&philo->table->state_mutex);
-		return ;
-	}
-	pthread_mutex_unlock(&philo->table->state_mutex);
 	printf("%zu %d is thinking\n", timez(philo), philo->id);
 }
 
+static void	monitor_death_meals(t_table *table, int i, long time_elapsed, int finished_dinner)
+{
+	long now;
+	while (++i < table->philo_nbr)
+	{
+		pthread_mutex_lock(&table->state_mutex);
+		now = timez(&table->philos[i]);
+		time_elapsed = now - table->philos[i].last_meal;
+		//printf("Philosopher: %d now: %ld last_meal: %ld time_elapsed: %ld time_to_die: %ld\n", table->philos[i].id, now, table->philos[i].last_meal, time_elapsed, table->time_to_die);
+		if (time_elapsed > table->time_to_die)
+		{
+			my_sleep(500);
+			printf("%ld %d died\n", timez(&table->philos[i]), table->philos[i].id);
+			table->philos[i].is_alive = 0;
+			table->end = 1;
+			pthread_mutex_unlock(&table->state_mutex);
+			return ;
+		}
+		if (table->max_meals > 0 && table->philos[i].count == table->max_meals)
+			finished_dinner++;
+		pthread_mutex_unlock(&table->state_mutex);
+	}
+	if (finished_dinner == table->philo_nbr)
+	{
+		pthread_mutex_lock(&table->state_mutex);
+		table->end = 1;
+		pthread_mutex_unlock(&table->state_mutex);
+		return ;
+	}
+}
 
 static void	*monitor(t_table *table)
 {
@@ -64,32 +77,11 @@ static void	*monitor(t_table *table)
 	{
 		i = -1;
 		finished_dinner = 0;
-		while (++i < table->philo_nbr)
-		{
-			pthread_mutex_lock(&table->state_mutex);
-			time_elapsed = current_time_ms() - table->philos[i].last_meal;
-			pthread_mutex_unlock(&table->state_mutex);
-			if (time_elapsed > table->time_to_die)
-			{
-				usleep(500);
-				printf("%ld %d died\n", timez(&table->philos[i]),
-					table->philos[i].id);
-				table->philos[i].is_alive = 0;
-				table->end = 1;
-				return (NULL);
-			}
-			if (table->max_meals > 0
-				&& table->philos[i].count == table->max_meals)
-				finished_dinner++;
-		}
-		if (finished_dinner == table->philo_nbr)
-		{
-			pthread_mutex_lock(&table->state_mutex);
-			table->end = 1;
-			pthread_mutex_unlock(&table->state_mutex);
+		time_elapsed = 0;
+		monitor_death_meals(table, i, time_elapsed, finished_dinner);
+		if (table->end)
 			return (NULL);
-		}
-		usleep(1000);
+		usleep(500);
 	}
 }
 
