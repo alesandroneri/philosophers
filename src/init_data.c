@@ -5,12 +5,15 @@ static void	init_forks(t_philo *philo, pthread_mutex_t *forks, int pos)
 	int nbr;
 
 	nbr = philo->table->philo_nbr;
-	philo->right_fork = &forks[(pos + 1) % nbr];
-	philo->left_fork = &forks[pos];
 	if (philo->id % 2 == 0)
 	{
 		philo->right_fork = &forks[pos];
 		philo->left_fork = &forks[(pos + 1) % nbr];
+	}
+	else
+	{
+		philo->right_fork = &forks[(pos + 1) % nbr];
+		philo->left_fork = &forks[pos];
 	}
 }
 
@@ -53,12 +56,8 @@ void	init_table(t_table *table)
 		free(table->philos);
 		return ;
 	}
-	table->forks_state = (int *)malloc(sizeof(int) * table->philo_nbr);
 	i = -1;
 	while (++i < table->philo_nbr)
-	{
 		pthread_mutex_init(&table->forks[i], NULL);
-		table->forks_state[i] = 0;
-	}
 	init_philosophers(table);
 }

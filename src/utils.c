@@ -3,7 +3,7 @@
 void	get_fork(t_philo *philo, pthread_mutex_t *fork)
 {
 	pthread_mutex_lock(fork);
-	printf("%zu %d has taken a fork\n", timez(philo), philo->id);
+	printf("%lld %d has taken a fork\n", timez(philo), philo->id);
 }
 
 void	put_fork(t_philo *philo, pthread_mutex_t *fork)
@@ -13,10 +13,8 @@ void	put_fork(t_philo *philo, pthread_mutex_t *fork)
 }
 void grab_forks(t_philo *philo, pthread_mutex_t *fork_one, pthread_mutex_t *fork_two)
 {
-	//pthread_mutex_lock(&philo->table->forks_mutex);
     get_fork(philo, fork_one);
     get_fork(philo, fork_two);
-    //pthread_mutex_unlock(&philo->table->forks_mutex);
 }
 void leave_forks(t_philo *philo, pthread_mutex_t *fork_one, pthread_mutex_t *fork_two)
 {
@@ -32,37 +30,40 @@ void	get_time(size_t milisecond)
 	while (current_time_ms() - start < milisecond)
 		usleep(200);
 }
-void my_sleep(size_t sleeping)
+void my_sleep(long long sleeping)
 {
-	size_t start;
+	long long start;
 	
 	start = current_time_ms();
 	while (current_time_ms() < start + sleeping)
 		;
 }
 
-long	timez(t_philo *philo)
+long long	timez(t_philo *philo)
 {
 	return (current_time_ms() - philo->table->start);
 }
 
-size_t	current_time_ms(void)
+long long	current_time_ms(void)
 {
 	struct timeval	time;
+	long long mili;
 
 	if (gettimeofday(&time, NULL) == -1)
 	{
 		printf("Error gettimeofday failed.\n");
 		return (1);
 	}
-	long mili = time.tv_sec * 1000;
+	//mili = time.tv_sec * 1000000 + time.tv_usec;
+	mili = (long long)time.tv_sec * 1000;
 	mili += time.tv_usec / 1000;
 	return (mili);
 }
 
 void	one_philo(t_table *table)
 {
-	printf("%zu %d died\n", current_time_ms(), table->philos->id);
+	get_fork(table->philos, table->philos->right_fork);
+	printf("%lld %d died\n", timez(table->philos), table->philos->id);
 }
 
 void	free_resources(t_table *table)
