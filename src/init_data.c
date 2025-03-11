@@ -5,13 +5,16 @@ static void	init_forks(t_philo *philo, t_fork *forks, int pos)
 	int nbr;
 
 	nbr = philo->table->philo_nbr;
-
-	philo->right_fork = &forks[(pos + 1) % nbr];
-	philo->left_fork = &forks[pos];
 	if (philo->id % 2 == 0)
 	{
 		philo->right_fork = &forks[pos];
 		philo->left_fork = &forks[(pos + 1) % nbr];
+	
+	}
+	else
+	{
+		philo->left_fork = &forks[pos];
+		philo->right_fork = &forks[(pos + 1) % nbr];
 	}
 }
 
@@ -25,11 +28,11 @@ static void	init_philosophers(t_table *table)
 	{
 		philo = table->philos + i;
 		philo->id = i + 1;
-		philo->last_meal = current_time_ms();
+		philo->table = table;
+		philo->last_meal = timez(philo);
 		philo->is_full = 0;
 		philo->is_alive = 1;
 		philo->count = 0;
-		philo->table = table;
 		init_forks(philo, table->forks, i);
 	}
 }

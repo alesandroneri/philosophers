@@ -9,23 +9,15 @@ static void	to_eat(t_philo *philo)
 		return ;
 	}
 	pthread_mutex_unlock(&philo->table->state_mutex);
-	pthread_mutex_lock(&philo->right_fork->fork);
-	if (!philo->table->end)
-		printf("%lld %d has taken a fork\n", timez(philo), philo->id);
-	pthread_mutex_lock(&philo->left_fork->fork);
-	if (!philo->table->end)
-		printf("%lld %d has taken a fork\n", timez(philo), philo->id);
+	grab_forks(philo, philo->right_fork, philo->left_fork);
 	philo->last_meal = timez(philo);
-	pthread_mutex_lock(&philo->table->state_mutex);
 	if (!philo->table->end)
 		printf("%lld %d is eating\n", philo->last_meal, philo->id);
 	my_sleep(philo->table->time_to_eat);
-	pthread_mutex_unlock(&philo->table->state_mutex);
 	philo->count++;
 	if (philo->count == philo->table->max_meals)
 		philo->is_full = 1;
-	pthread_mutex_unlock(&philo->right_fork->fork);
-	pthread_mutex_unlock(&philo->left_fork->fork);
+	leave_forks(philo, philo->right_fork, philo->left_fork);
 }
 
 static void	to_sleep(t_philo *philo)
@@ -65,15 +57,14 @@ static void	monitor_death_meals(t_table *table, int i, long long time_elapsed, i
 	{
 		now = timez(&table->philos[i]);
 		time_elapsed = now - table->philos[i].last_meal;
-		// printf("philo: %d now: %lld last_meal: %lld time_elapsed: %lld time_to_die: %lld\n",
-			// table->philos[i].id, now, table->philos[i].last_meal, time_elapsed, table->time_to_die);
+		//printf("philo: %d now: %lld last_meal: %lld time_elapsed: %lld time_to_die: %lld\n", table->philos[i].id, now, table->philos[i].last_meal, time_elapsed, table->time_to_die);
 		if (time_elapsed > table->time_to_die)
 		{
 			table->philos[i].is_alive = 0;
 			pthread_mutex_lock(&table->state_mutex);
 			table->end = 1;
 			pthread_mutex_unlock(&table->state_mutex);
-			my_sleep(10);
+			//my_sleep(10);
 			printf("%lld %d died\n", timez(&table->philos[i]), table->philos[i].id);
 			return ;
 		}
@@ -103,6 +94,7 @@ static void	*monitor(t_table *table)
 		monitor_death_meals(table, i, time_elapsed, &finished_dinner);
 		if (table->end)
 			return (NULL);
+		//my_sleep(1000);
 	}
 }
 
@@ -111,8 +103,8 @@ static void	*philosopher_routine(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
-	// if (philo->id % 2 != 0)
-	// 	my_sleep(5);
+	// if (philo->id % 2 == 0)
+	// 	my_sleep(1000);
 	while (!philo->table->end)
 	{
 		if (philo->table->max_meals == -1

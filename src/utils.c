@@ -3,7 +3,8 @@
 void	get_fork(t_philo *philo, t_fork *fork)
 {
 	pthread_mutex_lock(&fork->fork);
-	printf("%lld %d has taken a fork\n", timez(philo), philo->id);
+	if(!philo->table->end)
+		printf("%lld %d has taken a fork\n", timez(philo), philo->id);
 }
 
 void	put_fork(t_philo *philo, t_fork *fork)
@@ -11,24 +12,19 @@ void	put_fork(t_philo *philo, t_fork *fork)
 	(void)philo;
 	pthread_mutex_unlock(&fork->fork);
 }
+
 void grab_forks(t_philo *philo, t_fork *fork_one, t_fork *fork_two)
 {
 	if (philo->is_alive)
 	{
-		if (philo->id % 2 == 0)
-		{
-    		get_fork(philo, fork_one);
-    		get_fork(philo, fork_two);
-		}
-		else
-		{
-    		get_fork(philo, fork_two);
-			get_fork(philo, fork_one);
-		}
+    	get_fork(philo, fork_one);
+    	get_fork(philo, fork_two);
 	}
 }
+
 void leave_forks(t_philo *philo, t_fork *fork_one, t_fork *fork_two)
 {
+
 	put_fork(philo, fork_one);
 	put_fork(philo, fork_two);
 }
