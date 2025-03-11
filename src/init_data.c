@@ -1,19 +1,17 @@
 #include "../includes/philo.h"
 
-static void	init_forks(t_philo *philo, pthread_mutex_t *forks, int pos)
+static void	init_forks(t_philo *philo, t_fork *forks, int pos)
 {
 	int nbr;
 
 	nbr = philo->table->philo_nbr;
+
+	philo->right_fork = &forks[(pos + 1) % nbr];
+	philo->left_fork = &forks[pos];
 	if (philo->id % 2 == 0)
 	{
 		philo->right_fork = &forks[pos];
 		philo->left_fork = &forks[(pos + 1) % nbr];
-	}
-	else
-	{
-		philo->right_fork = &forks[(pos + 1) % nbr];
-		philo->left_fork = &forks[pos];
 	}
 }
 
@@ -49,8 +47,7 @@ void	init_table(t_table *table)
 	table->philos = (t_philo *)malloc(sizeof(t_philo) * table->philo_nbr);
 	if (!table->philos)
 		return ;
-	table->forks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t)
-			* table->philo_nbr);
+	table->forks = (t_fork *)malloc(sizeof(t_fork) * table->philo_nbr);
 	if (!table->forks)
 	{
 		free(table->philos);
@@ -58,6 +55,9 @@ void	init_table(t_table *table)
 	}
 	i = -1;
 	while (++i < table->philo_nbr)
-		pthread_mutex_init(&table->forks[i], NULL);
+	{
+		pthread_mutex_init(&table->forks[i].fork, NULL);
+		table->forks[i].fork_id = i;
+	}
 	init_philosophers(table);
 }

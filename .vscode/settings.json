@@ -1,10 +1,5 @@
 {
     "files.associations": {
-        "stdbool.h": "c",
-        "philo.h": "c",
-        "stdlib.h": "c",
-        "pthread.h": "c",
-        "time.h": "c",
-        "stdio.h": "c"
+        "philo.h": "c"
     }
 }

@@ -2,31 +2,59 @@
 
 static void	to_eat(t_philo *philo)
 {
+	pthread_mutex_lock(&philo->table->state_mutex);
 	if (philo->table->end || !philo->is_alive || philo->is_full)
+	{
+		pthread_mutex_unlock(&philo->table->state_mutex);
 		return ;
-	grab_forks(philo, philo->right_fork, philo->left_fork);
+	}
+	pthread_mutex_unlock(&philo->table->state_mutex);
+	pthread_mutex_lock(&philo->right_fork->fork);
+	if (!philo->table->end)
+		printf("%lld %d has taken a fork\n", timez(philo), philo->id);
+	pthread_mutex_lock(&philo->left_fork->fork);
+	if (!philo->table->end)
+		printf("%lld %d has taken a fork\n", timez(philo), philo->id);
 	philo->last_meal = timez(philo);
-	printf("%lld %d is eating\n", philo->last_meal, philo->id);
+	pthread_mutex_lock(&philo->table->state_mutex);
+	if (!philo->table->end)
+		printf("%lld %d is eating\n", philo->last_meal, philo->id);
 	my_sleep(philo->table->time_to_eat);
+	pthread_mutex_unlock(&philo->table->state_mutex);
 	philo->count++;
 	if (philo->count == philo->table->max_meals)
 		philo->is_full = 1;
-	leave_forks(philo, philo->right_fork, philo->left_fork);
+	pthread_mutex_unlock(&philo->right_fork->fork);
+	pthread_mutex_unlock(&philo->left_fork->fork);
 }
 
 static void	to_sleep(t_philo *philo)
 {
+	pthread_mutex_lock(&philo->table->state_mutex);
 	if (philo->table->end || !philo->is_alive || philo->is_full)
+	{
+		pthread_mutex_unlock(&philo->table->state_mutex);
 		return ;
-	printf("%lld %d is sleeping\n", timez(philo), philo->id);
+	}
+	pthread_mutex_unlock(&philo->table->state_mutex);
+	pthread_mutex_lock(&philo->table->state_mutex);
+	if (!philo->table->end)
+		printf("%lld %d is sleeping\n", timez(philo), philo->id);
 	my_sleep(philo->table->time_to_sleep);
+	pthread_mutex_unlock(&philo->table->state_mutex);
 }
 
 static void	to_think(t_philo *philo)
 {
+	pthread_mutex_lock(&philo->table->state_mutex);
 	if (philo->table->end || !philo->is_alive || philo->is_full)
+	{
+		pthread_mutex_unlock(&philo->table->state_mutex);
 		return ;
-	printf("%lld %d is thinking\n", timez(philo), philo->id);
+	}
+	pthread_mutex_unlock(&philo->table->state_mutex);
+	if (!philo->table->end)
+		printf("%lld %d is thinking\n", timez(philo), philo->id);
 }
 
 static void	monitor_death_meals(t_table *table, int i, long long time_elapsed, int *finished_dinner)
@@ -45,13 +73,12 @@ static void	monitor_death_meals(t_table *table, int i, long long time_elapsed, i
 			pthread_mutex_lock(&table->state_mutex);
 			table->end = 1;
 			pthread_mutex_unlock(&table->state_mutex);
-			my_sleep(200);
+			my_sleep(10);
 			printf("%lld %d died\n", timez(&table->philos[i]), table->philos[i].id);
 			return ;
 		}
 		if (table->max_meals > 0 && table->philos[i].count == table->max_meals)
 			(*finished_dinner)++;
-		// my_sleep(1);
 	}
 	if (*finished_dinner == table->philo_nbr)
 	{
@@ -76,7 +103,6 @@ static void	*monitor(t_table *table)
 		monitor_death_meals(table, i, time_elapsed, &finished_dinner);
 		if (table->end)
 			return (NULL);
-		my_sleep(1000);
 	}
 }
 
@@ -85,10 +111,10 @@ static void	*philosopher_routine(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
+	// if (philo->id % 2 != 0)
+	// 	my_sleep(5);
 	while (!philo->table->end)
 	{
-		if (philo->is_full)
-			break ;
 		if (philo->table->max_meals == -1
 			|| philo->count < philo->table->max_meals)
 		{
