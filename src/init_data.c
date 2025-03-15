@@ -9,13 +9,16 @@ static void	init_forks(t_philo *philo, t_fork *forks, int pos)
 	{
 		philo->right_fork = &forks[pos];
 		philo->left_fork = &forks[(pos + 1) % nbr];
-	
 	}
 	else
 	{
-		philo->left_fork = &forks[pos];
 		philo->right_fork = &forks[(pos + 1) % nbr];
+		philo->left_fork = &forks[pos];
 	}
+	// printf("Philo %d -> Left Fork: %d | Right Fork: %d\n",
+	// 	philo->id,
+	// 	philo->left_fork->fork_id,
+	// 	philo->right_fork->fork_id);
 }
 
 static void	init_philosophers(t_table *table)
@@ -33,6 +36,8 @@ static void	init_philosophers(t_table *table)
 		philo->is_full = 0;
 		philo->is_alive = 1;
 		philo->count = 0;
+		//if (pthread_mutex_init(&philo->meal_mutex, NULL) != 0)
+		//	return ;
 		init_forks(philo, table->forks, i);
 	}
 }
@@ -45,7 +50,7 @@ void	init_table(t_table *table)
 	table->start = current_time_ms();
 	if (pthread_mutex_init(&table->state_mutex, NULL) != 0)
 		return ;
-	if (pthread_mutex_init(&table->forks_mutex, NULL) != 0)
+	if (pthread_mutex_init(&table->print_mutex, NULL) != 0)
 		return ;
 	table->philos = (t_philo *)malloc(sizeof(t_philo) * table->philo_nbr);
 	if (!table->philos)

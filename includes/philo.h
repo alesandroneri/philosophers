@@ -20,6 +20,7 @@ typedef struct s_philo
 {
 	int					id;
 	pthread_t thread;
+	pthread_mutex_t meal_mutex;//controlar o acesso das refeições
 	t_fork		*right_fork;
 	t_fork		*left_fork;
 	int					count;
@@ -35,13 +36,14 @@ struct	s_table
 	long long					time_to_die;
 	long long					time_to_eat;
 	long long					time_to_sleep;
-	long long					time_to_think;
+	//long long					time_to_think;
 	int					max_meals;
 	long long					start;
 	int					end;
 	t_fork		*forks;
-	pthread_mutex_t forks_mutex;
+	//pthread_mutex_t forks_mutex;// tirar
 	pthread_mutex_t		state_mutex;
+	pthread_mutex_t print_mutex;
 	t_philo				*philos;;
 };
 //funcao para pegar o tempo
@@ -63,12 +65,14 @@ void put_fork(t_philo *philo, t_fork *fork);
 //funcao para o jantar
 void dinner(void *arg);
 //funcao para um filosofo
-void one_philo(t_table *table);
+//void one_philo(t_table *table);
 //funcao para pegar os garfos
 void grab_forks(t_philo *philo, t_fork *fork_one, t_fork *fork_two);
 //funcao para colocar os garfos de volta na mesa
 void leave_forks(t_philo *philo, t_fork *fork_one, t_fork *fork_two);
 //funcao para reproduzir o funcionamento do usleep
 void my_sleep(long long sleeping);
+//funcao para lidar com um unico filosofo
+void handle_one_philo(t_table *table);
 
 #endif
