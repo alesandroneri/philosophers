@@ -4,7 +4,10 @@ SRC = src/init_data.c \
 		src/parse.c \
 		src/utils.c \
 		src/dinner.c \
-		src/philo.c
+		src/forks.c \
+		src/time.c \
+		src/philosopher_routine.c \
+		src/main.c
 
 CC = cc
 

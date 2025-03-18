@@ -1,4 +1,14 @@
-
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parse.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: aneri-da <aneri-da@student.42.rio>         +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/03/18 20:07:23 by aneri-da          #+#    #+#             */
+/*   Updated: 2025/03/18 20:15:40 by aneri-da         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "../includes/philo.h"
 
@@ -61,15 +71,11 @@ static int	ft_atoi(const char *nptr)
 static int	is_all_numbers(char *nb)
 {
 	int	i;
-	int	len;
 
 	if (!nb)
 		return (0);
-	len = -1;
-	while (nb[++len] != '\0')
-		;
-	if (len == 1 && (nb[0] == '-' || nb[0] == '+'))
-		return (0);
+	if ((nb[0] == '-' || nb[0] == '+') && nb[1] == '\0')
+		return (printf("Error only numbers must be passed as arguments.\n"), 0);
 	i = 0;
 	if (nb[0] == '-')
 	{
@@ -79,11 +85,14 @@ static int	is_all_numbers(char *nb)
 	if (nb[0] == '+')
 		i++;
 	while (nb[i] != '\0')
-		if (!(nb[i] >= '0' && nb[i++] <= '9'))
+	{
+		if (!(nb[i] >= '0' && nb[i] <= '9'))
 		{
 			printf("Error only numbers must be passed as arguments.\n");
 			return (0);
 		}
+		i++;
+	}
 	return (1);
 }
 
